@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 다른 mapper와 중복되지 않도록 네임스페이스 기재 -->
+<mapper namespace="product">
+	
+	<select id="product_list" resultType="ProductDTO">
+		SELECT * FROM product 
+			ORDER BY product_name
+	</select>
+	
+	<select id="detail_product" resultType="ProductDTO">
+		SELECT * FROM product 
+			WHERE product_id=#{product_id}
+	</select>
+	
+	<select id="fileInfo" resultType="String">
+		SELECT picture_url FROM product
+			WHERE product_id=#{product_id}
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO product 
+			VALUES(seq_product.nextval, #{product_name}, #{price}, #{description}, #{picture_url})
+	</insert>
+	
+	<update id="update_product">
+		UPDATE product SET product_name=#{product_name}, price=#{price}, 
+			description=#{description},	picture_url=#{picture_url}
+			WHERE product_id=#{product_id}
+	</update>
+	
+	<delete id="product_delete">
+		DELETE FROM product
+			WHERE product_id=#{product_id}
+	</delete>
+	 
+</mapper>

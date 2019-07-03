@@ -1,0 +1,27 @@
+@charset "UTF-8";
+
+a:link {text-decoration: none; color: blue;}
+a:hover {text-decoration: underline; color: red;}
+a:visited {text-decoration: none;}
+a:active {text-decoration: none; color: yellow;}
+body{
+	background: #cccccc;
+	text-align: center;
+}
+table{
+	background : white;
+	border-collapse: collapse;
+	border-spacing: 0;
+	border: 2px solid black;
+	margin: auto;
+	width: 1000px;
+}
+th, td{
+	padding: 10px;
+	text-align: center;
+	vertical-align: middle;
+	border: 0.3px solid black;
+}
+th{
+	background: #8BB7FF;
+}

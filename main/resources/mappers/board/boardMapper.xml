@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 다른 mapper와 중복되지 않도록 네임스페이스 기재 -->
+<mapper namespace="board">
+	
+	<!-- select -->
+	<select id="listAll" resultType="BoardDTO">
+		<include refid="paging_header" />
+			SELECT bno,title,writer,name,regdate,viewcnt,show
+	  				,(select count(*) from reply where bno=b.bno) cnt					
+				FROM board b, member m
+				<include refid="search" />
+				ORDER BY bno DESC   
+		<include refid="paging_footer" />
+	</select>
+	<sql id="paging_header">
+		SELECT *
+			FROM (
+			    SELECT rownum AS rn, A.*
+			    FROM (	
+	</sql>
+	<sql id="paging_footer">
+		    ) A
+		) WHERE rn BETWEEN #{start} AND #{end}	
+	</sql>
+	
+	<!-- 레코드 갯수 계산 -->
+  <select id="countArticle" resultType="int">
+    SELECT count(*)
+    	FROM board b, member m
+    <include refid="search" />
+  </select>
+  
+  <sql id="search">
+    		<choose>
+			<when test="search_option != 'all' ">
+				WHERE b.writer=m.userid 
+				    AND show='Y'
+				    AND ${search_option} LIKE #{keyword}			
+			</when>
+			<otherwise>
+				WHERE b.writer=m.userid 
+				    AND show='Y'
+				    AND (name LIKE #{keyword} 
+				        OR title LIKE #{keyword}
+				        OR content LIKE #{keyword} )			
+			</otherwise>
+		</choose>
+  </sql>
+		
+	<select id="read" resultType="BoardDTO">
+		SELECT bno,title,regdate,content,viewcnt,name,writer 
+			FROM board b, member m
+			WHERE b.writer=m.userid AND bno=#{bno}		
+	</select>
+	
+	<!-- 첨부파일 목록, parameterType 생략 가능 -->
+	<select id="getAttach" resultType="String">
+		SELECT fullName 
+			FROM attach 
+			WHERE bno=#{bno} 
+			ORDER BY regdate DESC
+	</select>
+	<!-- /select -->
+	
+	<!-- insert -->
+	<insert id="insert">
+		INSERT INTO board(bno,title,content,writer)
+			VALUES(seq_board.nextval, #{title}, #{content}, #{writer})
+	</insert>
+	
+	<!-- 첨부파일 정보 저장 -->
+	<insert id="addAttach">
+		INSERT INTO attach(fullName, bno) 
+			VALUES(#{fullName}, seq_board.currval)
+	</insert>
+	
+	<!-- 첨부파일 업데이트 -->
+	<insert id="updateAttach">
+		INSERT INTO attach (fullName, bno) 
+			VALUES(#{fullName}, #{bno})
+	</insert>
+	<!-- /insert -->
+	
+	<!-- update -->
+	<!-- 조회수 증가 -->
+	<update id="increaseViewcnt">
+		UPDATE board SET viewcnt=viewcnt+1 
+			WHERE bno=#{bno}
+	</update>
+	
+	<!-- 게시물 내용 수정 -->
+	<update id="update">
+		UPDATE board 
+			SET title=#{title}, content=#{content}
+			WHERE bno=#{bno}
+	</update>
+	<!-- /update -->
+	
+	<!-- delete -->
+	<!-- 첨부파일 삭제 -->
+	<delete id="deleteFile">
+		DELETE FROM attach
+			WHERE fullName=#{fullName}
+	</delete>
+	
+	<delete id="delete">
+		UPDATE board SET show='N' WHERE bno=#{bno}
+	</delete>
+	<!-- /delete -->
+	
+</mapper>

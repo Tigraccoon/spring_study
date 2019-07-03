@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 다른 mapper와 중복되지 않도록 네임스페이스 기재 -->
+<mapper namespace="cart">
+	<select id="listCart" resultType="CartDTO">
+		SELECT cart_id, m.userid, name, p.product_id, product_name, amount, price, price*amount money  
+			FROM member m, cart c, product p 
+			WHERE m.userid=c.userid AND p.product_id=c.product_id AND m.userid=#{userid}
+	</select>
+	
+	<select id="sumMoney" resultType="int">
+		SELECT nvl(sum(price * amount) ,0) money 
+			FROM product p, cart c 
+			WHERE c.product_id=p.product_id	AND userid=#{userid}
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO cart (cart_id,userid,product_id,amount) 
+			VALUES (cart_seq.nextval,#{userid},#{product_id},#{amount})
+	</insert>
+	
+	<update id="modifyCart">
+		UPDATE cart 
+			SET amount=#{amount} 
+			WHERE cart_id=#{cart_id}
+		
+	</update>
+	
+	<delete id="delete">
+		DELETE FROM cart 
+			WHERE cart_id=#{cart_id}
+	</delete>
+	
+	<delete id="deleteAll">
+		DELETE FROM cart
+			WHERE userid=#{userid}
+	</delete>
+	
+	 <!-- 상품별 장바구니 금액 통계 -->
+    <select id="cart_money" resultType="CartDTO">
+		select product_name, sum(price*amount) money
+		from cart c, product p 
+		where c.product_id=p.product_id   
+		group by product_name 
+		order by product_name	
+	</select>
+	
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
